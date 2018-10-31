@@ -40,19 +40,11 @@ public class EncryptForm {
                 if (validadeFields()) {
                     try {
                         File file = new File(filePathTextField.getText());
-                        File outputFile = new File(outputPath);
-                        String fileOutputName = file.getName().replaceFirst("[.][^.]+$", "");
-                        String extension;
-                        if (extensionTextField.getText().isEmpty()) {
-                            extension = ".crypt";
+                        if (file.isDirectory()) {
+                            encryptFilesFromFolder(file);
                         } else {
-                            extension = extensionTextField.getText();
+                            encryptFile(file);
                         }
-
-                        CryptoUtils.INSTANCE.encrypt(
-                                keyTextField.getText(),
-                                file,
-                                new File(outputPath+"/"+fileOutputName+extension));
                     } catch (CryptoException e1) {
                         e1.printStackTrace();
                     }
@@ -65,9 +57,52 @@ public class EncryptForm {
         // TODO: place custom component creation code here
     }
 
+    private String getExtension() {
+        String extension;
+        if (extensionTextField.getText().isEmpty()) {
+            extension = ".crypt";
+        } else {
+            extension = extensionTextField.getText();
+        }
+
+        return extension;
+    }
+
+    private void encryptFile(File file) throws CryptoException {
+        File outputFile = new File(outputPath);
+        String fileOutputName = file.getName().replaceFirst("[.][^.]+$", "");
+        String extension = getExtension();
+
+        CryptoUtils.INSTANCE.encrypt(
+                keyTextField.getText(),
+                file,
+                new File(outputPath+"/"+fileOutputName+extension));
+    }
+
+    private void encryptFilesFromFolder(File file) throws CryptoException {
+        String extension = getExtension();
+        File[] files = file.listFiles();
+        String fileOutputPath = outputPath+"/"+file.getName();
+        File outputPath = new File(fileOutputPath);
+        outputPath.mkdir();
+
+        if(files != null) {
+            for (File fileEntry : files) {
+                if (!fileEntry.isDirectory()) {
+                    String fileOutputName = fileEntry.getName().replaceFirst("[.][^.]+$", "");
+
+                    CryptoUtils.INSTANCE.encrypt(
+                            keyTextField.getText(),
+                            fileEntry,
+                            new File(outputPath+"/"+fileOutputName+extension));
+                }
+            }
+        }
+    }
+
     private void makeOutputDir() {
         File file = new File(outputPath);
-        file.mkdir();
+        file.mkdirs();
     }
 
     private boolean validadeFields() {
