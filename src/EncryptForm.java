@@ -1,3 +1,6 @@
+import encrypt.CryptoException;
+import encrypt.CryptoUtils;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,8 +16,11 @@ public class EncryptForm {
     private JTextField keyTextField;
 
     private int selectedFileType = 0;
+    private String outputPath = System.getProperty("user.home")+"/FileEncrypter/output";
 
     public EncryptForm() {
+        makeOutputDir();
+
         fileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -31,7 +37,26 @@ public class EncryptForm {
         encryptButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                validadeFields();
+                if (validadeFields()) {
+                    try {
+                        File file = new File(filePathTextField.getText());
+                        File outputFile = new File(outputPath);
+                        String fileOutputName = file.getName().replaceFirst("[.][^.]+$", "");
+                        String extension;
+                        if (extensionTextField.getText().isEmpty()) {
+                            extension = ".crypt";
+                        } else {
+                            extension = extensionTextField.getText();
+                        }
+
+                        CryptoUtils.INSTANCE.encrypt(
+                                keyTextField.getText(),
+                                file,
+                                new File(outputPath+"/"+fileOutputName+extension));
+                    } catch (CryptoException e1) {
+                        e1.printStackTrace();
+                    }
+                }
             }
         });
     }
@@ -40,8 +65,13 @@ public class EncryptForm {
         // TODO: place custom component creation code here
     }
 
+    private void makeOutputDir() {
+        File file = new File(outputPath);
+        file.mkdir();
+    }
+
     private boolean validadeFields() {
-        boolean isValid = false;
+        boolean isValid = true;
         String key = keyTextField.getText();
         String filePath = filePathTextField.getText();
 
@@ -55,8 +85,12 @@ public class EncryptForm {
             isValid = false;
         }
 
-        if (key.length() != 16  && key.length() != 24 && key.length() != 32) {
-            JOptionPane.showMessageDialog(keyTextField, "The key needs to be 16, 24 or 32 bytes", "ERROR", JOptionPane.ERROR_MESSAGE);
+        if (key.getBytes().length != 16  && key.getBytes().length != 24 && key.getBytes().length != 32) {
+            JOptionPane.showMessageDialog(
+                    keyTextField,
+                    "The key needs to be 16, 24 or 32 bytes\nYour key lenght is: "+key.getBytes().length, "ERROR",
+                    JOptionPane.ERROR_MESSAGE
+            );
             isValid = false;
         }
 
@@ -64,7 +98,7 @@ public class EncryptForm {
     }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("File Encrypter");
+        JFrame frame = new JFrame("File AES Encrypter");
         frame.setContentPane(new EncryptForm().mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
