@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/File Encrypter.iml" filepath="$PROJECT_DIR$/File Encrypter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FileEncrypter.iml" filepath="$PROJECT_DIR$/FileEncrypter.iml" />
     </modules>
   </component>
 </project>
