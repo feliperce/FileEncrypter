@@ -14,10 +14,6 @@ import javax.crypto.IllegalBlockSizeException
 import javax.crypto.NoSuchPaddingException
 import javax.crypto.spec.SecretKeySpec
 
-/**
- * A utility class that encrypts or decrypts a file.
- * @author www.codejava.net
- */
 object CryptoUtils {
     private val ALGORITHM = "AES"
     private val TRANSFORMATION = "AES"
