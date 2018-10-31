@@ -12,7 +12,7 @@ public class EncryptForm {
     }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("EncryptForm");
+        JFrame frame = new JFrame("File Encrypter");
         frame.setContentPane(new EncryptForm().mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
