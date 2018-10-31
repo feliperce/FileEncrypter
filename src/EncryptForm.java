@@ -16,7 +16,8 @@ public class EncryptForm {
     private JTextField keyTextField;
 
     private int selectedFileType = 0;
-    private String outputPath = System.getProperty("user.home")+"/FileEncrypter/output";
+    private String encryptOutputPath = System.getProperty("user.home")+"/FileEncrypter/output/encrypted";
+    private String decryptOutputPath = System.getProperty("user.home")+"/FileEncrypter/output/decrypted";
 
     public EncryptForm() {
         makeOutputDir();
@@ -51,6 +52,24 @@ public class EncryptForm {
                 }
             }
         });
+
+        decryptButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (validadeFields()) {
+                    try {
+                        File file = new File(filePathTextField.getText());
+                        if (file.isDirectory()) {
+                            decryptFilesFromFolder(file);
+                        } else {
+                            decryptFile(file);
+                        }
+                    } catch (CryptoException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     private void createUIComponents() {
@@ -69,20 +88,52 @@ public class EncryptForm {
     }
 
     private void encryptFile(File file) throws CryptoException {
-        File outputFile = new File(outputPath);
+        File outputFile = new File(encryptOutputPath);
         String fileOutputName = file.getName().replaceFirst("[.][^.]+$", "");
         String extension = getExtension();
 
         CryptoUtils.INSTANCE.encrypt(
                 keyTextField.getText(),
                 file,
-                new File(outputPath+"/"+fileOutputName+extension));
+                new File(encryptOutputPath +"/"+fileOutputName+extension));
     }
 
     private void encryptFilesFromFolder(File file) throws CryptoException {
         String extension = getExtension();
         File[] files = file.listFiles();
-        String fileOutputPath = outputPath+"/"+file.getName();
+        String fileOutputPath = encryptOutputPath +"/"+file.getName();
+        File outputPath = new File(fileOutputPath);
+        outputPath.mkdir();
+
+        if(files != null) {
+            for (File fileEntry : files) {
+                if (!fileEntry.isDirectory()) {
+                    String fileOutputName = fileEntry.getName().replaceFirst("[.][^.]+$", "");
+
+                    CryptoUtils.INSTANCE.encrypt(
+                            keyTextField.getText(),
+                            fileEntry,
+                            new File(outputPath+"/"+fileOutputName+extension));
+                }
+            }
+        }
+    }
+
+    private void decryptFile(File file) throws CryptoException {
+        File outputFile = new File(encryptOutputPath);
+        String fileOutputName = file.getName().replaceFirst("[.][^.]+$", "");
+        String extension = getExtension();
+
+        CryptoUtils.INSTANCE.decrypt(
+                keyTextField.getText(),
+                file,
+                new File(decryptOutputPath +"/"+fileOutputName+extension));
+    }
+
+    private void decryptFilesFromFolder(File file) throws CryptoException {
+        String extension = getExtension();
+        File[] files = file.listFiles();
+        String fileOutputPath = decryptOutputPath +"/"+file.getName();
         File outputPath = new File(fileOutputPath);
         outputPath.mkdir();
 
@@ -101,7 +152,9 @@ public class EncryptForm {
     }
 
     private void makeOutputDir() {
-        File file = new File(outputPath);
+        File file = new File(encryptOutputPath);
+        file.mkdirs();
+        file = new File(decryptOutputPath);
         file.mkdirs();
     }
 
