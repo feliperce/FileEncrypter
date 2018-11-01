@@ -14,23 +14,28 @@ import javax.crypto.IllegalBlockSizeException
 import javax.crypto.NoSuchPaddingException
 import javax.crypto.spec.SecretKeySpec
 
+enum class CryptoStatus(val type: Int) {
+    SUCCESS(1),
+    WROG_KEY(10)
+}
+
 object CryptoUtils {
     private val ALGORITHM = "AES"
     private val TRANSFORMATION = "AES"
 
     @Throws(CryptoException::class)
-    fun encrypt(key: String, inputFile: File, outputFile: File) {
-        doCrypto(Cipher.ENCRYPT_MODE, key, inputFile, outputFile)
+    fun encrypt(key: String, inputFile: File, outputFile: File): Int {
+        return doCrypto(Cipher.ENCRYPT_MODE, key, inputFile, outputFile)
     }
 
     @Throws(CryptoException::class)
-    fun decrypt(key: String, inputFile: File, outputFile: File) {
-        doCrypto(Cipher.DECRYPT_MODE, key, inputFile, outputFile)
+    fun decrypt(key: String, inputFile: File, outputFile: File): Int {
+        return doCrypto(Cipher.DECRYPT_MODE, key, inputFile, outputFile)
     }
 
     @Throws(CryptoException::class)
     private fun doCrypto(cipherMode: Int, key: String, inputFile: File,
-                         outputFile: File) {
+                         outputFile: File): Int {
         try {
             val secretKey = SecretKeySpec(key.toByteArray(), ALGORITHM)
             val cipher = Cipher.getInstance(TRANSFORMATION)
@@ -53,14 +58,15 @@ object CryptoUtils {
         } catch (ex: NoSuchAlgorithmException) {
             throw CryptoException("Error encrypting/decrypting file", ex)
         } catch (ex: InvalidKeyException) {
-            throw CryptoException("Error encrypting/decrypting file", ex)
+            return CryptoStatus.WROG_KEY.type
         } catch (ex: BadPaddingException) {
-            throw CryptoException("Error encrypting/decrypting file", ex)
+            return CryptoStatus.WROG_KEY.type
         } catch (ex: IllegalBlockSizeException) {
             throw CryptoException("Error encrypting/decrypting file", ex)
         } catch (ex: IOException) {
             throw CryptoException("Error encrypting/decrypting file", ex)
         }
 
+        return CryptoStatus.SUCCESS.type
     }
 }

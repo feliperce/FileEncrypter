@@ -1,4 +1,5 @@
 import encrypt.CryptoException;
+import encrypt.CryptoStatus;
 import encrypt.CryptoUtils;
 
 import javax.swing.*;
@@ -73,7 +74,7 @@ public class EncryptForm {
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
+
     }
 
     private String getExtension() {
@@ -92,10 +93,14 @@ public class EncryptForm {
         String fileOutputName = file.getName().replaceFirst("[.][^.]+$", "");
         String extension = getExtension();
 
-        CryptoUtils.INSTANCE.encrypt(
+        int status = CryptoUtils.INSTANCE.encrypt(
                 keyTextField.getText(),
                 file,
                 new File(encryptOutputPath +"/"+fileOutputName+extension));
+
+        if (status == CryptoStatus.SUCCESS.getType()) {
+            JOptionPane.showMessageDialog(keyTextField, "Encrypted with success", "SUCCESS", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     private void encryptFilesFromFolder(File file) throws CryptoException {
@@ -105,16 +110,22 @@ public class EncryptForm {
         File outputPath = new File(fileOutputPath);
         outputPath.mkdir();
 
+        int status = 0;
+
         if(files != null) {
             for (File fileEntry : files) {
                 if (!fileEntry.isDirectory()) {
                     String fileOutputName = fileEntry.getName().replaceFirst("[.][^.]+$", "");
 
-                    CryptoUtils.INSTANCE.encrypt(
+                    status = CryptoUtils.INSTANCE.encrypt(
                             keyTextField.getText(),
                             fileEntry,
                             new File(outputPath+"/"+fileOutputName+extension));
                 }
+            }
+
+            if (status == CryptoStatus.SUCCESS.getType()) {
+                JOptionPane.showMessageDialog(keyTextField, "Encrypted with success", "SUCCESS", JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }
@@ -124,10 +135,16 @@ public class EncryptForm {
         String fileOutputName = file.getName().replaceFirst("[.][^.]+$", "");
         String extension = getExtension();
 
-        CryptoUtils.INSTANCE.decrypt(
+        int status = CryptoUtils.INSTANCE.decrypt(
                 keyTextField.getText(),
                 file,
                 new File(decryptOutputPath +"/"+fileOutputName+extension));
+
+        if (status == CryptoStatus.SUCCESS.getType()) {
+            JOptionPane.showMessageDialog(keyTextField, "Decrypted with success", "SUCCESS", JOptionPane.INFORMATION_MESSAGE);
+        } else if (status == CryptoStatus.WROG_KEY.getType()) {
+            JOptionPane.showMessageDialog(keyTextField, "Wrong key", "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void decryptFilesFromFolder(File file) throws CryptoException {
@@ -137,16 +154,24 @@ public class EncryptForm {
         File outputPath = new File(fileOutputPath);
         outputPath.mkdir();
 
+        int status = 0;
+
         if(files != null) {
             for (File fileEntry : files) {
                 if (!fileEntry.isDirectory()) {
                     String fileOutputName = fileEntry.getName().replaceFirst("[.][^.]+$", "");
 
-                    CryptoUtils.INSTANCE.encrypt(
+                    status = CryptoUtils.INSTANCE.encrypt(
                             keyTextField.getText(),
                             fileEntry,
                             new File(outputPath+"/"+fileOutputName+extension));
                 }
+            }
+
+            if (status == CryptoStatus.SUCCESS.getType()) {
+                JOptionPane.showMessageDialog(keyTextField, "Decrypted with success", "SUCCESS", JOptionPane.INFORMATION_MESSAGE);
+            } else if (status == CryptoStatus.WROG_KEY.getType()) {
+                JOptionPane.showMessageDialog(keyTextField, "Wrong key", "ERROR", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
